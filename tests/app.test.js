@@ -1,10 +1,10 @@
 const request = require('supertest');
 const app = require('../app');
 
-describe('these tests are for routes',()=>{
-
-  it('the root route should respond to requests',()=>{
-    // console.log(request);
+describe('Tests For Routes',()=>{
+  it('the root route should respond to requests',(done)=>{
+    request(app)
+      .get('/')
+      .expect(200,done)
   })
-
 })
