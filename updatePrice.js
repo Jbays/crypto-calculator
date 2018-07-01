@@ -26,18 +26,13 @@ axios.get('https://api.coinmarketcap.com/v2/ticker/')
     coinsInvested.forEach((coinCapMarketId,index)=>{
       promiseArr.push(
          knex('coins_index')
-          .where('id','=',index+1)
+          .where('symbol','=',response.data['data'][coinCapMarketId].symbol)
           .update({'usd_per_unit':response.data['data'][coinCapMarketId]['quotes']['USD']['price']})
           .catch((err)=>{
             return console.error("this is your problem, boss",err,'with this id',index+1)
           })
       )
-
       console.log('when is this executed?');
-
-      // console.log("this is what I want",response.data['data'][coinCapMarketId]['name'])
-      // console.log("this is what I want",response.data['data'][coinCapMarketId]['symbol'])
-      // console.log("this is what I want",response.data['data'][coinCapMarketId]['quotes']['USD']['price'])
     })
 
     return Promise.all(promiseArr)
