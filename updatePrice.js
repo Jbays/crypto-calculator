@@ -1,9 +1,11 @@
+const env = 'development';
+const config = require('./knexfile')[env];
+const knex = require('knex')(config);
+
 const axios = require('axios');
 
-//NOTE: request address
-// 'https://api.coinmarketcap.com/v2/ticker/'
-
-//NOTE: to add more coins, I have to look up
+//NOTE: to add more coins, I have to look at the ticket's id.
+//if the id changes, then my profitiability will MISCALCULATE!
 const coinsInvested = [
   1,    //bitcoin
   1027, //ethereum
@@ -17,14 +19,29 @@ const coinsInvested = [
   2,    //litecoin
 ]
 
-//NOTE: when should this script run?  On opening of the app?
 axios.get('https://api.coinmarketcap.com/v2/ticker/')
   .then((response)=>{
-    //probably should use a filter
-    coinsInvested.forEach((cryptoIndex)=>{
-      console.log("this is what I want",response.data['data'][cryptoIndex]['name'])
-      console.log("this is what I want",response.data['data'][cryptoIndex]['symbol'])
-      console.log("this is what I want",response.data['data'][cryptoIndex]['quotes']['USD']['price'])
+    let promiseArr = [];
+
+    coinsInvested.forEach((coinCapMarketId,index)=>{
+      promiseArr.push(
+         knex('coins_index')
+          .where('id','=',index+1)
+          .update({'usd_per_unit':response.data['data'][coinCapMarketId]['quotes']['USD']['price']})
+          .catch((err)=>{
+            return console.error("this is your problem, boss",err,'with this id',index+1)
+          })
+      )
+
+      console.log('when is this executed?');
+
+      // console.log("this is what I want",response.data['data'][coinCapMarketId]['name'])
+      // console.log("this is what I want",response.data['data'][coinCapMarketId]['symbol'])
+      // console.log("this is what I want",response.data['data'][coinCapMarketId]['quotes']['USD']['price'])
     })
 
+    return Promise.all(promiseArr)
+  })
+  .catch((err)=>{
+    return console.error('your get request failed',err);
   })

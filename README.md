@@ -10,9 +10,11 @@ Calculates profitability for crypto assets
 ## To Run db migrations:
 `knex migrate:latest`
 
-Should create a proof of concept 'coinx_index_2' table.
+Populates seed data for 10 cryptocurrencies.  From 30 June 2018.
 
 ### Up to date pricing
-updatePrice.js requests the latest crypto prices for 10 different cryptocurrencies.
+`node updatePrice.js`
+
+Updates database with the latest prices for 10 different cryptocurrencies.
 
 Prices are from [CoinMarketCap](https://coinmarketcap.com/)
