@@ -1,8 +1,7 @@
 const knex = require('knex');
 
-exports.up = function(knex, Promise) {
+exports.up = (knex, Promise)=>{
   return knex.schema.createTable('coins_index',(table)=>{
-    // table.increments('coin_id');
     table.string('symbol').primary();
     table.string('coin_name');
     table.decimal('usd_per_unit');
@@ -18,11 +17,12 @@ exports.up = function(knex, Promise) {
                 {coin_name:'Cardano',symbol:'ADA',usd_per_unit:0.135845},
                 {coin_name:'EOS',symbol:'EOS',usd_per_unit:8.06736},
                 {coin_name:'Litecoin',symbol:'LTC',usd_per_unit:80.4113}])
-  }).then((response)=>{
-    console.log("do this next thing");
   })
+  // .then((response)=>{
+  //   console.log("do this next thing");
+  // })
 };
 
-exports.down = function(knex, Promise) {
+exports.down = (knex, Promise)=>{
   return knex.schema.dropTable('coins_index');
 };

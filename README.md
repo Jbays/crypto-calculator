@@ -10,7 +10,8 @@ Calculates profitability for crypto assets
 ## To Run db migrations:
 `knex migrate:latest`
 
-Populates seed data for 10 cryptocurrencies.  From 30 June 2018.
+Populates 1. seed data for 10 cryptocurrencies (dated 30 June 2018).
+          2. all purchases made on coinbase.
 
 ### Up to date pricing
 `node updatePrice.js`
