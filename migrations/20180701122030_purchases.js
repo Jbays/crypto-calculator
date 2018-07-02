@@ -26,6 +26,9 @@ exports.up = (knex, Promise)=>{
         {symbol:'ETH',pch_date:'28 june 2018',pch_usd_per_unit:438.62,pch_units:2.24639793,traded:true}
       ])
   })
+  .catch((err)=>{
+    return console.error("error from purchase migration",err)
+  })
 };
 
 exports.down = (knex, Promise)=>{
