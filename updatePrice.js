@@ -1,8 +1,8 @@
 const env = 'development';
 const config = require('./knexfile')[env];
 const knex = require('knex')(config);
-
 const axios = require('axios');
+const _ = require('underscore');
 
 //NOTE: to add more coins, I have to look at the ticket's id.
 //if the id changes, then my profitiability will MISCALCULATE!
@@ -19,7 +19,7 @@ const coinsInvested = [
   2,    //litecoin
 ]
 
-let allCurrencies = {};
+let allCurrencies = [];
 
 axios.get('https://api.coinmarketcap.com/v2/ticker/')
   .then((response)=>{
@@ -37,20 +37,21 @@ axios.get('https://api.coinmarketcap.com/v2/ticker/')
     return Promise.all(promiseArr)
   })
   .then((res)=>{
+    //find all unique types of symbols in the purchase(pch) table
     knex('purchases(pch)')
       .distinct('symbol')
       .select()
       .then((res)=>{
-        res.forEach((object,index)=>{
-          allCurrencies[index] = object.symbol;
+        res.forEach((object)=>{
+          allCurrencies.push(object.symbol);
         })
 
         return allCurrencies;
       })
     .then((response)=>{
       let promiseArr = [];
-
-      Object.values(allCurrencies).forEach((searchSymbols)=>{
+      //for each unique symbol, find total amount of that symbol's crypto in purchase(pch) table
+      allCurrencies.forEach((searchSymbols)=>{
         promiseArr.push(
           knex('purchases(pch)')
           .where({
@@ -63,8 +64,13 @@ axios.get('https://api.coinmarketcap.com/v2/ticker/')
       return Promise.all(promiseArr);
     })
     .then((response)=>{
-      console.log("allCurrencies",allCurrencies);
-      console.log("hello sailor",response);
+      allCurrencies.forEach((symbol,index)=>{
+        console.log("this crypto>>>>>>>>>>>>>>>>>>>>>>>",symbol);
+        console.log("has this balance in purchases(pch)",response[index][0].sum);
+      })
+
+
+
     })
 
   })
