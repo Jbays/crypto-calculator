@@ -20,7 +20,7 @@ exports.up = (knex, Promise)=>{
       {symbol:'LTC',pch_date:'24 march 2018',pch_usd_per_unit:167.99,pch_units:1,traded:false},
       {symbol:'ETH',pch_date:'26 march 2018',pch_usd_per_unit:488.73,pch_units:1,traded:true},
       {symbol:'ETH',pch_date:'30 march 2018',pch_usd_per_unit:394.98,pch_units:1.995721,traded:false},
-      {symbol:'ETH',pch_date:'15 may 2018',pch_usd_per_unit:717.38,pch_units:1,traded:false},
+      {symbol:'ETH',pch_date:'15 may 2018',pch_usd_per_unit:717.38,pch_units:1,traded:true},
       {symbol:'ETH',pch_date:'10 june 2018',pch_usd_per_unit:521.03,pch_units:1.13465156,traded:true},
       {symbol:'ETH',pch_date:'28 june 2018',pch_usd_per_unit:438.62,pch_units:2.24639793,traded:true}
     ])

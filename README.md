@@ -12,10 +12,15 @@ Calculates profitability for crypto assets
 
 Populates 1. seed data for 10 cryptocurrencies (dated 30 June 2018).
           2. all purchases made on coinbase.
+          3. all trades made on binance.  (up to 2 July 2018)
 
 ### Up to date pricing
 `node updatePrice.js`
 
 Updates database with the latest prices for 10 different cryptocurrencies.
+
+Calculates available crypto balances in purchases table.
+
+Eventually, will also work for trades table.
 
 Prices are from [CoinMarketCap](https://coinmarketcap.com/)

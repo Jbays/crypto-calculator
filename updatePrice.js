@@ -19,10 +19,11 @@ const coinsInvested = [
   2,    //litecoin
 ]
 
+let allCurrencies = {};
+
 axios.get('https://api.coinmarketcap.com/v2/ticker/')
   .then((response)=>{
     let promiseArr = [];
-
     coinsInvested.forEach((coinCapMarketId,index)=>{
       promiseArr.push(
          knex('coins_index')
@@ -32,10 +33,40 @@ axios.get('https://api.coinmarketcap.com/v2/ticker/')
             return console.error("this is your problem, boss",err,'with this id',index+1)
           })
       )
-      console.log('when is this executed?');
+    })
+    return Promise.all(promiseArr)
+  })
+  .then((res)=>{
+    knex('purchases(pch)')
+      .distinct('symbol')
+      .select()
+      .then((res)=>{
+        res.forEach((object,index)=>{
+          allCurrencies[index] = object.symbol;
+        })
+
+        return allCurrencies;
+      })
+    .then((response)=>{
+      let promiseArr = [];
+
+      Object.values(allCurrencies).forEach((searchSymbols)=>{
+        promiseArr.push(
+          knex('purchases(pch)')
+          .where({
+            symbol: searchSymbols,
+            traded: false
+          })
+          .sum('pch_units')
+        )
+      })
+      return Promise.all(promiseArr);
+    })
+    .then((response)=>{
+      console.log("allCurrencies",allCurrencies);
+      console.log("hello sailor",response);
     })
 
-    return Promise.all(promiseArr)
   })
   .catch((err)=>{
     return console.error('your get request failed',err);
