@@ -21,4 +21,15 @@ Populates 1. seed data for 10 cryptocurrencies (dated 30 June 2018).
 2. Calculates available crypto balances in purchases table.
 3. Eventually, will also work for trades table.
 
+### Up to date balances table
+`node updateBalance.js`
+
+For each crypto symbol:
+1. Calculates all units available cash (liquid).
+2. Calculates the weighted cost per unit acquisition
+3. Inserts these values into the balance table.
+
+Total estimated investment:
+`select symbol, liquid_units*weighted_usd_per_unit as total_investment from balances;`
+
 Prices are from [CoinMarketCap](https://coinmarketcap.com/)

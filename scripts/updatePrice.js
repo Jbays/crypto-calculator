@@ -1,5 +1,5 @@
 const env = 'development';
-const config = require('./knexfile')[env];
+const config = require('../knexfile')[env];
 const knex = require('knex')(config);
 const axios = require('axios');
 const _ = require('underscore');
@@ -36,17 +36,8 @@ axios.get('https://api.coinmarketcap.com/v2/ticker/')
     })
     return Promise.all(promiseArr)
   })
-  //NOTE: this .then has nothing to do with updating the prices.  This should probably be refactored into another call.
-  .then((res)=>{
-    //returns all non-traded purchases
-    return knex('purchases(pch)').where('traded','=',false).select('symbol','pch_usd_per_unit','pch_units').orderBy('symbol','desc');
-  })
   .then((response)=>{
-    //NOTE:  USE THE RESPONSE TO CALCULATE
-    // FOR EACH COIN:
-    // 1. total amount liquid
-    // 2. weighted_usd_per_unit
-    console.log("response",response)
+    console.log("youre done!");
   })
     //find all unique types of symbols in the purchase(pch) table
     // return knex('purchases(pch)')
