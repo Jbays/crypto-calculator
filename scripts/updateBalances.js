@@ -7,17 +7,12 @@ const _ = require('underscore');
 // NOTE: the stray 4 at the end of my available ETH
 //MIGHT NEED a library to better handle the annoying little floating decimals
 
-
 knex('purchases(pch)')
   .select('symbol','pch_usd_per_unit','pch_units')
   .where('traded','=',false)
   .orderBy('symbol','desc')
 .then((response)=>{
-  //NOTE:  USE THE RESPONSE TO CALCULATE
-  // FOR EACH COIN:
-  // 1. total amount liquid
-  // 2. weighted_usd_per_unit
-  calculateSumsForAllCryptos(response)
+  return calculateSumsForAllCryptos(response)
     .then((response)=>{
       let allCryptoSums = [];
 
@@ -36,13 +31,28 @@ knex('purchases(pch)')
           console.log('for each crypto purchased,','\n',
                       'inserted into balance table is:','\n',
                       'a crypto database entry with fields symbol, sum, and weighted_usd_per_unit');
-          knex.destroy();
         })
         .catch((err)=>{
           console.error('failed to insert in balances table',err)
         })
     })
 
+})
+.then((response)=>{
+
+  // `select date_trade,trade_buy,amount-fee as liquid_units,trade_sell,total as costs from trades
+  //  where type = 'BUY';`
+
+  return knex('trades')
+    .select('*')
+    .then((response)=>{
+
+    })
+  //NOTE:  USE THE RESPONSE TO CALCULATE
+  // FOR EACH COIN:
+  // 1. total amount liquid
+  // 2. weighted_usd_per_unit
+  console.log("this is response",response);
 })
 
 /**

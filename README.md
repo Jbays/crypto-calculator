@@ -36,5 +36,12 @@ For each cryptocurrency in __trades__ table:
 2. Calculates the weighted cost per unit acquisition.
 3. Inserts these entries into the balance table.
 
+All information required to understand trade:
+`select date_trade,trade_buy,amount-fee as liquid_units,trade_sell,total as costs from trades
+where type = 'BUY';`
+
 Total estimated investment:
 `select symbol, liquid_units*weighted_usd_per_unit as total_investment from balances;`
+
+### ERD:
+[a link](assets/crypto-calculator-erd.png)
