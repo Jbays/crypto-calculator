@@ -19,7 +19,7 @@ knex('purchases(pch)')
   // 2. weighted_usd_per_unit
   calculateSumsForAllCryptos(response)
     .then((response)=>{
-      let output = [];
+      let allCryptoSums = [];
 
       response.forEach((entry)=>{
         let obj = {};
@@ -28,18 +28,22 @@ knex('purchases(pch)')
         obj.liquid_units = entry[1];
         obj.weighted_usd_per_unit = entry[2];
 
-        output.push(obj);
+        allCryptoSums.push(obj);
       })
 
-      return knex('balances').insert(output)
+      return knex('balances').insert(allCryptoSums)
+        .then((done)=>{
+          console.log('for each crypto purchased,','\n',
+                      'inserted into balance table is:','\n',
+                      'a crypto database entry with fields symbol, sum, and weighted_usd_per_unit');
+          knex.destroy();
+        })
         .catch((err)=>{
           console.error('failed to insert in balances table',err)
         })
     })
 
 })
-
-
 
 /**
  * @name - calculateSumsForAllCryptos
@@ -61,13 +65,14 @@ async function calculateSumsForAllCryptos(input){
 }
 
 /**
- * @name - calculateSumsForAllCryptos
+ * @name - calculateWeighedSums
  * @description - for each crypto purchased, calculates the weighted_usd_per_unit
  * @param - array of purchase objects
  * @param - obj with crypto sums
- * @returns - {symbolName: sum}
+ * @returns - [['symbol1','sum1','weighted_usd_per_unit1'],
+ *             ['symbol2','sum2','weighted_usd_per_unit2']]
  **/
-async function calculateWeighedSums(input,sumsObj){
+function calculateWeighedSums(input,sumsObj){
   let weighted = {};
   input.forEach((purchaseObj)=>{
     purchaseObj['weighted_usd_per_unit'] = ((purchaseObj.pch_units/sumsObj[purchaseObj.symbol])*purchaseObj.pch_usd_per_unit).toFixed(2);
@@ -81,5 +86,6 @@ async function calculateWeighedSums(input,sumsObj){
     }
   })
 
+  //preps data for 'objectification'
   return _.zip(Object.keys(sumsObj),Object.values(sumsObj),Object.values(weighted));
 }

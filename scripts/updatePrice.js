@@ -37,7 +37,8 @@ axios.get('https://api.coinmarketcap.com/v2/ticker/')
     return Promise.all(promiseArr)
   })
   .then((response)=>{
-    console.log("youre done!");
+    console.log("coins_index table has latest values!");
+    knex.destroy();
   })
     //find all unique types of symbols in the purchase(pch) table
     // return knex('purchases(pch)')
