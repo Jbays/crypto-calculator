@@ -44,4 +44,7 @@ Total estimated investment:
 `select symbol, liquid_units*weighted_usd_per_unit as total_investment from balances;`
 
 ### ERD:
-[a link](assets/crypto-calculator-erd.png)
+
+![alt text][logo]
+
+[logo]: https://github.com/Jbays/crypto-calculator/blob/readmeImage/assets/crypto-calculator-erd.png
