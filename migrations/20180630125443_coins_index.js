@@ -1,5 +1,3 @@
-const knex = require('knex');
-
 exports.up = (knex, Promise)=>{
   return knex.schema.createTable('coins_index',(table)=>{
     table.string('symbol').primary();
