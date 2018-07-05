@@ -35,6 +35,7 @@ knex('purchases(pch)')
   })
 
   //NOTE: highly similar logic in this map
+
   mapped.forEach((purchasedObj)=>{
     if ( !weightsObj.hasOwnProperty(purchasedObj.symbol) ) {
       weightsObj[purchasedObj.symbol] = parseFloat(purchasedObj.weighted_usd_per_unit)
@@ -72,7 +73,7 @@ knex('purchases(pch)')
   let strayBNBFees = [];
 
   return knex('trades')
-    .select('date_trade','trade_buy','amount','fee','fee_coin_symbol')
+    .select('date_trade','trade_buy','amount','fee','total','fee_coin_symbol')
     .where('type','=','BUY')
     .then((response)=>{
       let buys = response;
@@ -80,9 +81,11 @@ knex('purchases(pch)')
       let cryptoFromBuying = {};
 
       return knex('trades')
-        .select('date_trade','trade_sell','amount','fee','fee_coin_symbol')
+        //for weighted_usd_per_unit, I must select for 'total' (which is the total cost for the given purchase)
+        .select('date_trade','trade_sell','amount','fee','total','fee_coin_symbol')
         .where('type','=','SELL')
         .then((response)=>{
+          //NOTE: highly similar logic to the map and forEach before
           response.forEach((salesObj)=>{
             if ( !cryptoFromSelling.hasOwnProperty(salesObj.trade_sell) ) {
               cryptoFromSelling[salesObj.trade_sell] = parseFloat(salesObj.amount);
@@ -93,7 +96,7 @@ knex('purchases(pch)')
           return cryptoFromSelling;
       })
       .then((response)=>{
-        console.log("for each cryptocurrency, here is their respective balance",response);
+        //NOTE: Again, highly similar logic to the map and forEach
         buys.forEach((tradeObj)=>{
           if ( !cryptoFromBuying.hasOwnProperty(tradeObj.trade_buy) ) {
             cryptoFromBuying[tradeObj.trade_buy] = parseFloat(tradeObj.amount-tradeObj.fee);
@@ -105,6 +108,22 @@ knex('purchases(pch)')
       })
   })
   .then((response)=>{
-    console.log("here is all the crypto from trading",response);
+    let output = [];
+    Object.entries(response).forEach((entry)=>{
+      let obj = {};
+      obj.symbol = entry[0];
+      obj.liquid_units = entry[1];
+      output.push(obj)
+    })
+
+    //NOTE: this INSERT to balances table does NOT include the weighted_usd_per_unit!
+    return knex('balances')
+      .insert(output)
+      .catch((err)=>{
+        console.error('failed to insert into the balances table',err);
+      })
   })
+})
+.then((response)=>{
+  console.log('this is response',response);
 })
