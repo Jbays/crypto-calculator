@@ -36,6 +36,7 @@ For each cryptocurrency in __trades__ table:
 2. Calculates the weighted cost per unit acquisition.
 3. Inserts these entries into the balance table.
 
+##### Useful SQL Queries
 All information required to understand trade:
 `select date_trade,trade_buy,amount-fee as liquid_units,trade_sell,total as costs from trades
 where type = 'BUY';`

@@ -1,3 +1,5 @@
+const purchaseData = require('../data/purchases');
+
 exports.up = (knex, Promise)=>{
   return knex.schema.createTable('purchases(pch)',(table)=>{
     table.increments('pch_id');
@@ -12,16 +14,7 @@ exports.up = (knex, Promise)=>{
     // table.foreign('trade_id').references('trades.trade_id')
   })
   .then((response)=>{
-    return knex('purchases(pch)').insert([
-      {symbol:'ETH',pch_date:'8 march 2018',pch_usd_per_unit:679.75,pch_units:1.1596374,withdrawn:true},
-      {symbol:'ETH',pch_date:'17 march 2018',pch_usd_per_unit:552.15,pch_units:1.42762706,withdrawn:false},
-      {symbol:'LTC',pch_date:'24 march 2018',pch_usd_per_unit:167.99,pch_units:1,withdrawn:false},
-      {symbol:'ETH',pch_date:'26 march 2018',pch_usd_per_unit:488.73,pch_units:1,withdrawn:true},
-      {symbol:'ETH',pch_date:'30 march 2018',pch_usd_per_unit:394.98,pch_units:1.995721,withdrawn:false},
-      {symbol:'ETH',pch_date:'15 may 2018',pch_usd_per_unit:717.38,pch_units:1,withdrawn:true},
-      {symbol:'ETH',pch_date:'10 june 2018',pch_usd_per_unit:521.03,pch_units:1.13465156,withdrawn:true},
-      {symbol:'ETH',pch_date:'28 june 2018',pch_usd_per_unit:438.62,pch_units:2.24639793,withdrawn:true}
-    ])
+    return knex('purchases(pch)').insert(purchaseData)
   })
   .catch((err)=>{
     return console.error("error from purchase migration",err)
