@@ -6,7 +6,7 @@ exports.up = (knex, Promise)=> {
         // table.foreign('symbol').references('coins_index.symbol');
         table.decimal('weighted_usd_per_unit')
         table.decimal('liquid_units',16,10);
-        // table.string('location')
+        table.string('from')
       })
     });
 }
