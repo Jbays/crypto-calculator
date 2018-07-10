@@ -44,6 +44,10 @@ where type = 'BUY';`
 Total estimated investment:
 `select symbol, liquid_units*weighted_usd_per_unit as total_investment from balances;`
 
+All purchases from coinbase transferred to binance:
+`select sum(pch_units) from "purchase(pch)"
+ where symbol = 'ETH' and withdrawn = true;`
+
 ### ERD:
 
 ![alt text][logo]
