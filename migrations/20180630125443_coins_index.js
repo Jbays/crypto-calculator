@@ -20,9 +20,6 @@ exports.up = (knex, Promise)=>{
   .catch((err)=>{
     return console.error("error from coins_index migration",err)
   })
-  // .then((response)=>{
-  //   console.log("do this next thing");
-  // })
 };
 
 exports.down = (knex, Promise)=>{

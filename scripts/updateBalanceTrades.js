@@ -20,8 +20,7 @@ knex('trades')
     allCryptosBought['ETH'] = 0;
     allCryptosBought['BTC'] = 0;
     return allCryptosBought;
-  })
-  .then((allCryptosBoughtObj)=>{
+  }).then((allCryptosBoughtObj)=>{
     return knex('trades')
       .select('trade_id','date_trade','trade_buy','amount','fee','total','fee_coin_symbol','trade_sell')
       .where('type','=','BUY')
@@ -49,8 +48,7 @@ knex('trades')
         })
         return allCryptosBoughtObj;
       })
-    })
-    .then((allCryptoSums)=>{
+    }).then((allCryptoSums)=>{
       return knex('trades')
         .select('trade_id','date_trade','trade_buy','amount','fee','total','fee_coin_symbol','trade_sell')
         .where('type','=','SELL')
@@ -72,13 +70,12 @@ knex('trades')
           })
           return allCryptoSums;
         })
-    })
-    .then((allCryptosSumsWithNegatives)=>{
+    }).then((allCryptosSumsWithNegatives)=>{
       //HACK --> technically, this is a hack.  10 July 2018
       //But since I only purchase ETH from coinbase, don't see an immediate problem.
       //this knex query will pull every coinbase ETH purchase transferred to binance
 
-      return knex('purchases(pch)')
+      return knex('purchases')
         .sum('pch_units')
         .where('symbol','=','ETH')
         .where('withdrawn','=',true)
@@ -86,8 +83,7 @@ knex('trades')
           allCryptosSumsWithNegatives['ETH'] += parseFloat(knexResult[0].sum)
           return allCryptosSumsWithNegatives;
         })
-    })
-    .then((allCryptosSumsProper)=>{
+    }).then((allCryptosSumsProper)=>{
       console.log('allCryptosSumsProper',allCryptosSumsProper);
       Object.keys(allCryptosSumsProper).forEach((singleCryptoSum)=>{
         let obj = {};

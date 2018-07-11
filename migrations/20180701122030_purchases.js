@@ -1,7 +1,7 @@
 const purchaseData = require('../data/purchases');
 
 exports.up = (knex, Promise)=>{
-  return knex.schema.createTable('purchases(pch)',(table)=>{
+  return knex.schema.createTable('purchases',(table)=>{
     table.increments('pch_id');
     table.date('pch_date');
     table.string('symbol');
@@ -14,7 +14,7 @@ exports.up = (knex, Promise)=>{
     // table.foreign('trade_id').references('trades.trade_id')
   })
   .then((response)=>{
-    return knex('purchases(pch)').insert(purchaseData)
+    return knex('purchases').insert(purchaseData)
   })
   .catch((err)=>{
     return console.error("error from purchase migration",err)
@@ -22,5 +22,5 @@ exports.up = (knex, Promise)=>{
 };
 
 exports.down = (knex, Promise)=>{
-  return knex.schema.dropTable('purchases(pch)');
+  return knex.schema.dropTable('purchases');
 };

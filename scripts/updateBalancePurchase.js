@@ -7,7 +7,7 @@ const _ = require('underscore');
 // NOTE: the stray 4 at the end of my available ETH
 //MIGHT NEED a library to better handle the annoying little floating decimals
 
-knex('purchases(pch)')
+knex('purchases')
   .select('symbol','pch_usd_per_unit','pch_units')
   .where('withdrawn','=',false)
   .orderBy('symbol','desc')
