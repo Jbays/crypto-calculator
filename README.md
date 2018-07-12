@@ -50,6 +50,6 @@ All purchases from coinbase transferred to binance:
 
 ### ERD:
 
-![alt text][logo]
+![alt text][erd]
 
-[logo]: https://github.com/Jbays/crypto-calculator/blob/readmeImage/assets/crypto-calculator-erd.png
+[erd]: https://github.com/Jbays/crypto-calculator/blob/master/assets/crypto-calculator-erd.png
