@@ -22,11 +22,11 @@ knex('trades')
     return allCryptosBought;
   }).then((allCryptosBoughtObj)=>{
     return knex('trades')
-      .select('trade_id','date_trade','trade_buy_symbol','amount','fee','total_cost','fee_coin_symbol','trade_sell_symbol')
+      .select('trade_id','trade_type','trade_buy_symbol','amount','fee','total_cost','fee_coin_symbol','trade_sell_symbol')
       .where('trade_type','=','BUY')
       .then((allTradesBuy)=>{
         allTradesBuy.forEach((singleTradeBuy)=>{
-          //add amount to trade_buy_symbol (symbol)
+          //add amount to trade_buy_symbol
           allCryptosBoughtObj[singleTradeBuy.trade_buy_symbol] += parseFloat(singleTradeBuy.amount)
           //subtract amount from trade_sell_symbol
           allCryptosBoughtObj[singleTradeBuy.trade_sell_symbol] -= parseFloat(singleTradeBuy.total_cost)
@@ -37,20 +37,16 @@ knex('trades')
             allCryptosBoughtObj[singleTradeBuy.trade_buy_symbol] -= parseFloat(singleTradeBuy.fee);
           } else {
             //NOTE: this BNB fee should be pushed into an array
-            strayBNBFees.push([
-              singleTradeBuy.trade_id,
-              singleTradeBuy.date_trade,
-              parseFloat(singleTradeBuy.fee),
-              singleTradeBuy.fee_coin_symbol,
-              singleTradeBuy.trade_sell_symbol
-            ])
+            strayBNBFees.push({
+              trade_id: singleTradeBuy.trade_id
+            })
           }
         })
         return allCryptosBoughtObj;
       })
     }).then((allCryptoSums)=>{
       return knex('trades')
-        .select('trade_id','date_trade','trade_buy_symbol','amount','fee','total_cost','fee_coin_symbol','trade_sell_symbol')
+        .select('trade_id','trade_type','trade_buy_symbol','amount','fee','total_cost','fee_coin_symbol','trade_sell_symbol')
         .where('trade_type','=','SELL')
         .then((allTradesSell)=>{
           allTradesSell.forEach((singleTradeSell)=>{
@@ -59,13 +55,9 @@ knex('trades')
             if ( singleTradeSell.trade_sell_symbol === singleTradeSell.fee_coin_symbol ) {
               allCryptosBought[singleTradeSell.trade_sell_symbol] -= parseFloat(singleTradeSell.fee);
             } else {
-              strayBNBFees.push([
-                singleTradeSell.trade_id,
-                singleTradeSell.date_trade,
-                parseFloat(singleTradeSell.fee),
-                singleTradeSell.fee_coin_symbol,
-                singleTradeSell.trade_sell_symbol
-              ])
+              strayBNBFees.push({
+                trade_id: singleTradeSell.trade_id
+              })
             }
           })
           return allCryptoSums;
@@ -93,6 +85,11 @@ knex('trades')
       })
       return knex('balances')
         .insert(insertIntoBalancesTable)
+        .then((knexResult)=>{
+          //NOTE: to trades_conversions this inserts all trades which require converting units to USD
+          return knex('trades_conversions')
+            .insert(strayBNBFees);
+        })
         .then((done)=>{
           console.log('calculated all balances from all trades');
           knex.destroy();
