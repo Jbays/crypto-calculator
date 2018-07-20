@@ -38,8 +38,8 @@ For each cryptocurrency in __trades__ table:
 
 ##### Useful SQL Queries
 All information required to understand trade:
-`select date_trade,trade_buy,amount-fee as liquid_units,trade_sell,total as costs from trades
-where type = 'BUY';`
+`select date_trade,trade_buy_symbol,amount-fee as liquid_units,trade_sell_symbol,total as costs from trades
+where trade_type = 'BUY';`
 
 Total estimated investment:
 `select symbol, liquid_units*weighted_usd_per_unit as total_investment from balances;`
