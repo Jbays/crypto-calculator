@@ -7,13 +7,13 @@ let strayBNBFees = [];
 let insertIntoBalancesTable = [];
 
 knex('trades')
-  .distinct('trade_buy')
+  .distinct('trade_buy_symbol')
   .select()
-  .where('type','=','BUY')
+  .where('trade_type','=','BUY')
   .then((allUniqueCryptos)=>{
     let allCryptosBought = {};
     allUniqueCryptos.forEach((cryptoCurrency)=>{
-      allCryptosBought[cryptoCurrency.trade_buy] = 0;
+      allCryptosBought[cryptoCurrency.trade_buy_symbol] = 0;
     })
     //HACK -- 10 July 2018
     //NOTE: which knexQuery will return to me all the cryptos I trade?
@@ -22,50 +22,42 @@ knex('trades')
     return allCryptosBought;
   }).then((allCryptosBoughtObj)=>{
     return knex('trades')
-      .select('trade_id','date_trade','trade_buy','amount','fee','total','fee_coin_symbol','trade_sell')
-      .where('type','=','BUY')
+      .select('trade_id','trade_type','trade_buy_symbol','amount','fee','total_cost','fee_coin_symbol','trade_sell_symbol')
+      .where('trade_type','=','BUY')
       .then((allTradesBuy)=>{
         allTradesBuy.forEach((singleTradeBuy)=>{
-          //add amount to trade_buy (symbol)
-          allCryptosBoughtObj[singleTradeBuy.trade_buy] += parseFloat(singleTradeBuy.amount)
-          //subtract amount from trade_sell
-          allCryptosBoughtObj[singleTradeBuy.trade_sell] -= parseFloat(singleTradeBuy.total)
+          //add amount to trade_buy_symbol
+          allCryptosBoughtObj[singleTradeBuy.trade_buy_symbol] += parseFloat(singleTradeBuy.amount)
+          //subtract amount from trade_sell_symbol
+          allCryptosBoughtObj[singleTradeBuy.trade_sell_symbol] -= parseFloat(singleTradeBuy.total_cost)
 
-          //if trade_buy is equal to fee_coin_symbol
-          if ( singleTradeBuy.trade_buy === singleTradeBuy.fee_coin_symbol ) {
+          //if trade_buy_symbol is equal to fee_coin_symbol
+          if ( singleTradeBuy.trade_buy_symbol === singleTradeBuy.fee_coin_symbol ) {
             //subtract fee from amount
-            allCryptosBoughtObj[singleTradeBuy.trade_buy] -= parseFloat(singleTradeBuy.fee);
+            allCryptosBoughtObj[singleTradeBuy.trade_buy_symbol] -= parseFloat(singleTradeBuy.fee);
           } else {
             //NOTE: this BNB fee should be pushed into an array
-            strayBNBFees.push([
-              singleTradeBuy.trade_id,
-              singleTradeBuy.date_trade,
-              parseFloat(singleTradeBuy.fee),
-              singleTradeBuy.fee_coin_symbol,
-              singleTradeBuy.trade_sell
-            ])
+            strayBNBFees.push({
+              trade_id: singleTradeBuy.trade_id
+            })
           }
         })
         return allCryptosBoughtObj;
       })
     }).then((allCryptoSums)=>{
       return knex('trades')
-        .select('trade_id','date_trade','trade_buy','amount','fee','total','fee_coin_symbol','trade_sell')
-        .where('type','=','SELL')
+        .select('trade_id','trade_type','trade_buy_symbol','amount','fee','total_cost','fee_coin_symbol','trade_sell_symbol')
+        .where('trade_type','=','SELL')
         .then((allTradesSell)=>{
           allTradesSell.forEach((singleTradeSell)=>{
-            allCryptoSums[singleTradeSell.trade_sell] += parseFloat(singleTradeSell.total);
-            allCryptoSums[singleTradeSell.trade_buy]  -= parseFloat(singleTradeSell.amount);
-            if ( singleTradeSell.trade_sell === singleTradeSell.fee_coin_symbol ) {
-              allCryptosBought[singleTradeSell.trade_sell] -= parseFloat(singleTradeSell.fee);
+            allCryptoSums[singleTradeSell.trade_sell_symbol] += parseFloat(singleTradeSell.total_cost);
+            allCryptoSums[singleTradeSell.trade_buy_symbol]  -= parseFloat(singleTradeSell.amount);
+            if ( singleTradeSell.trade_sell_symbol === singleTradeSell.fee_coin_symbol ) {
+              allCryptosBought[singleTradeSell.trade_sell_symbol] -= parseFloat(singleTradeSell.fee);
             } else {
-              strayBNBFees.push([
-                singleTradeSell.trade_id,
-                singleTradeSell.date_trade,
-                parseFloat(singleTradeSell.fee),
-                singleTradeSell.fee_coin_symbol,
-                singleTradeSell.trade_sell
-              ])
+              strayBNBFees.push({
+                trade_id: singleTradeSell.trade_id
+              })
             }
           })
           return allCryptoSums;
@@ -74,7 +66,6 @@ knex('trades')
       //HACK --> technically, this is a hack.  10 July 2018
       //But since I only purchase ETH from coinbase, don't see an immediate problem.
       //this knex query will pull every coinbase ETH purchase transferred to binance
-
       return knex('purchases')
         .sum('pch_units')
         .where('symbol','=','ETH')
@@ -84,7 +75,6 @@ knex('trades')
           return allCryptosSumsWithNegatives;
         })
     }).then((allCryptosSumsProper)=>{
-      console.log('allCryptosSumsProper',allCryptosSumsProper);
       Object.keys(allCryptosSumsProper).forEach((singleCryptoSum)=>{
         let obj = {};
         obj.symbol = singleCryptoSum;
@@ -95,6 +85,11 @@ knex('trades')
       })
       return knex('balances')
         .insert(insertIntoBalancesTable)
+        .then((knexResult)=>{
+          //NOTE: to trades_conversions this inserts all trades which require converting units to USD
+          return knex('trades_conversions')
+            .insert(strayBNBFees);
+        })
         .then((done)=>{
           console.log('calculated all balances from all trades');
           knex.destroy();
