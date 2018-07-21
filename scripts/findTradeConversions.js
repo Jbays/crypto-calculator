@@ -30,7 +30,17 @@ knex('trades')
   .select('trades.trade_id','date_trade','trade_sell_symbol')
   .where('trades.trade_type','=','BUY')
   .then((response)=>{
-    console.log('this is response',response);
+    return response.map((singleTradeConversion)=>{
+      //maps trade_sell_symbol to its cryptocurrencychart's equivalent id
+      singleTradeConversion.trade_sell_symbol = mapCryptoToId[singleTradeConversion.trade_sell_symbol.toLowerCase()];
+      //format ISO with Time to YYYY-MM-DD
+      singleTradeConversion.date_trade = singleTradeConversion.date_trade.toISOString().substring(0,10);
+      return singleTradeConversion
+    })
+  })
+  .then((response)=>{
+    //NOTE: this response data is compatible with cryptocurrencychart's api.
+    console.log('hello from the end',response);
   })
 
 //for trade_type = SELL,
