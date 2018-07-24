@@ -7,6 +7,8 @@ const key = require('../data/cCCKey');
 const axios = require('axios');
 const _ = require('underscore');
 
+let axiosGetTradeIdSequence = [];
+
 //IDs from www.cryptocurrencychart.com
 const mapCryptoToId = {
   'btc': 363,
@@ -41,12 +43,13 @@ knex('trades')
     })
   })
   .then((response)=>{
-    // console.log('!!response',response);
+    console.log('!!response',response);
+    response.forEach((singleTradeBuy)=>{
+      axiosGetTradeIdSequence.push(singleTradeBuy.trade_id)
+    })
     //NOTE: this response data is compatible with cryptocurrencychart's api.
     let baseUrl = `https://www.cryptocurrencychart.com/api/coin/view/${response[0].trade_sell_symbol}/${response[0].date_trade}/USD`;
-    console.log('hello baseUrl',baseUrl);
-    // console.log('secret',secret);
-    // console.log('key',key);
+    let baseUrl2 = `https://www.cryptocurrencychart.com/api/coin/view/2471/${response[0].date_trade}/USD`;
 
     const config = {
       headers:{
@@ -55,14 +58,39 @@ knex('trades')
       }
     }
 
-    //this works.  now I need to get the promise.all version of this working.
-    return axios.get(baseUrl,config)
-      .catch((err)=>{
-        console.error('this is your error',err);
+    return axios.all([axios.get(baseUrl,config),axios.get(baseUrl2,config)])
+      .then((response)=>{
+        //this returns an array of response objects
+        return [response[0].data,response[1].data]
       })
+      .catch((err)=>{
+        console.error('this is error is from axios.all',err)
+      })
+
+    //this works.  now I need to get the promise.all version of this working.
+    // return axios.get(baseUrl,config)
+    //   .then((axiosResponse)=>{
+    //     console.log('this is axiosResponse',axiosResponse);
+    //     return axiosResponse.data
+    //   })
+    //   .catch((err)=>{
+    //     console.error('this is your error',err);
+    //   })
   })
   .then((response)=>{
-    console.log('this is response',response)
+    console.log('trade id sequence',axiosGetTradeIdSequence);
+
+    console.log('at the end response',response)
+
+    knex('trades_conversions')
+      .where('trade_id','=',axiosGetTradeIdSequence[0])
+      .update({
+        usd_per_unit: response[0].coin.price,
+        bnb_price_usd: response[1].coin.price
+      })
+      .then((knexResponse)=>{
+        console.log('this is knexResponse',knexResponse);
+      })
   })
 
 //for trade_type = SELL,
@@ -73,9 +101,3 @@ knex('trades')
 //   .then((response)=>{
 //     console.log('this is response',response);
 //   })
-
-
-// axios.get('thisURL')
-//   .then((response)=>{
-//
-//   });
