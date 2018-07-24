@@ -1,10 +1,12 @@
 const env = 'development';
 const config = require('../knexfile')[env];
 const knex = require('knex')(config);
-const secret = require('../data/cryptoCurrencyChartSecret');
-const key = require('../data/cCCKey');
 
 const axios = require('axios');
+const secret = require('../data/cryptoCurrencyChartSecret');
+const key = require('../data/cCCKey');
+const axiosConfig = {headers: {Key: key,Secret: secret}}
+
 const _ = require('underscore');
 
 let axiosGetTradeIdSequence = [];
@@ -43,54 +45,48 @@ knex('trades')
     })
   })
   .then((response)=>{
-    console.log('!!response',response);
-    response.forEach((singleTradeBuy)=>{
+    let axiosPromiseArr = [];
+    
+    response.forEach((singleTradeBuy,index)=>{
+      //helps keep track of the sequence of trade_id -- for axios promise.all (may NOT be necessary)
       axiosGetTradeIdSequence.push(singleTradeBuy.trade_id)
+
+      //many of these requests are duplicates.  In the future, I should optimize this request builder.
+      //request-builder should remove duplicate api calls.
+      axiosPromiseArr.push(axios.all([
+        singleTradeBuy.trade_id,
+        axios.get(`https://www.cryptocurrencychart.com/api/coin/view/${response[index].trade_sell_symbol}/${response[index].date_trade}/USD`,axiosConfig),
+        axios.get(`https://www.cryptocurrencychart.com/api/coin/view/2471/${response[index].date_trade}/USD`,axiosConfig),
+      ]))
     })
-    //NOTE: this response data is compatible with cryptocurrencychart's api.
-    let baseUrl = `https://www.cryptocurrencychart.com/api/coin/view/${response[0].trade_sell_symbol}/${response[0].date_trade}/USD`;
-    let baseUrl2 = `https://www.cryptocurrencychart.com/api/coin/view/2471/${response[0].date_trade}/USD`;
 
-    const config = {
-      headers:{
-        Key: key,
-        Secret: secret
-      }
-    }
-
-    return axios.all([axios.get(baseUrl,config),axios.get(baseUrl2,config)])
-      .then((response)=>{
-        //this returns an array of response objects
-        return [response[0].data,response[1].data]
-      })
-      .catch((err)=>{
-        console.error('this is error is from axios.all',err)
-      })
-
-    //this works.  now I need to get the promise.all version of this working.
-    // return axios.get(baseUrl,config)
-    //   .then((axiosResponse)=>{
-    //     console.log('this is axiosResponse',axiosResponse);
-    //     return axiosResponse.data
-    //   })
-    //   .catch((err)=>{
-    //     console.error('this is your error',err);
-    //   })
+    return axios.all(axiosPromiseArr)
   })
   .then((response)=>{
-    console.log('trade id sequence',axiosGetTradeIdSequence);
+    let knexPromiseArr = [];
 
-    console.log('at the end response',response)
+    response.forEach((responseObj)=>{
+      knexPromiseArr.push(
+        knex('trades_conversions')
+        .where('trade_id','=',responseObj[0])
+        .update({
+          usd_per_unit: responseObj[1].data.coin.price,
+          bnb_price_usd: responseObj[2].data.coin.price
+        })
+        .catch((err)=>{
+          console.error('you have an error with trade_conversions update w/trade_id:',response[0])
+        })
+      )
+    })
 
-    knex('trades_conversions')
-      .where('trade_id','=',axiosGetTradeIdSequence[0])
-      .update({
-        usd_per_unit: response[0].coin.price,
-        bnb_price_usd: response[1].coin.price
-      })
-      .then((knexResponse)=>{
-        console.log('this is knexResponse',knexResponse);
-      })
+    return Promise.all(knexPromiseArr);
+  })
+  .then((response)=>{
+    console.log('successfully queried cryptocurrencycharts.com,','\n',
+                'prices in usd at date_time for:','\n',
+                'trade_sell_symbol price','\n',
+                'and bnb_price')
+    knex.destroy();
   })
 
 //for trade_type = SELL,
