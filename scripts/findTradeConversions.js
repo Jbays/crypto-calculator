@@ -1,6 +1,8 @@
 const env = 'development';
 const config = require('../knexfile')[env];
 const knex = require('knex')(config);
+const secret = require('../data/cryptoCurrencyChartSecret');
+const key = require('../data/cCCKey');
 
 const axios = require('axios');
 const _ = require('underscore');
@@ -39,8 +41,28 @@ knex('trades')
     })
   })
   .then((response)=>{
+    // console.log('!!response',response);
     //NOTE: this response data is compatible with cryptocurrencychart's api.
-    console.log('hello from the end',response);
+    let baseUrl = `https://www.cryptocurrencychart.com/api/coin/view/${response[0].trade_sell_symbol}/${response[0].date_trade}/USD`;
+    console.log('hello baseUrl',baseUrl);
+    // console.log('secret',secret);
+    // console.log('key',key);
+
+    const config = {
+      headers:{
+        Key: key,
+        Secret: secret
+      }
+    }
+
+    //this works.  now I need to get the promise.all version of this working.
+    return axios.get(baseUrl,config)
+      .catch((err)=>{
+        console.error('this is your error',err);
+      })
+  })
+  .then((response)=>{
+    console.log('this is response',response)
   })
 
 //for trade_type = SELL,
@@ -52,7 +74,6 @@ knex('trades')
 //     console.log('this is response',response);
 //   })
 
-// const baseUrl = `https://www.cryptocurrencychart.com/api/coin/view/`;
 
 // axios.get('thisURL')
 //   .then((response)=>{
