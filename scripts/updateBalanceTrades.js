@@ -36,61 +36,42 @@ knex('trades')
             });
           }
         })
-        console.log('allCryptosBought after!!!',allCryptosBought);
+        // console.log('allCryptosBought after!!!',allCryptosBought);
+        return allCryptosBought;
       })
   })
-  //       allTradesBuy.forEach((singleTradeBuy)=>{
-  //         console.log('label',singleTradeBuy)
-  //         //add amount to trade_buy_symbol
-  //         allCryptosBoughtObj[singleTradeBuy.trade_buy_symbol] += parseFloat(singleTradeBuy.amount)
-  //         //subtract amount from trade_sell_symbol
-  //         allCryptosBoughtObj[singleTradeBuy.trade_sell_symbol] -= parseFloat(singleTradeBuy.total_cost)
-
-  //         //if trade_buy_symbol is equal to fee_coin_symbol
-  //         if ( singleTradeBuy.trade_buy_symbol === singleTradeBuy.fee_coin_symbol ) {
-  //           //subtract fee from amount
-  //           allCryptosBoughtObj[singleTradeBuy.trade_buy_symbol] -= parseFloat(singleTradeBuy.fee);
-  //         } else {
-  //           //NOTE: this BNB fee should be pushed into an array
-  //           strayBNBFees.push({
-  //             trade_id: singleTradeBuy.trade_id
-  //           })
-  //         }
-  //       })
-  //       return allCryptosBoughtObj;
-  //     })
-  //   })
-  //   .then((allCryptosSumsWithNegatives)=>{
-  //     //HACK --> technically, this is a hack.  10 July 2018
-  //     //But since I only purchase ETH from coinbase, don't see an immediate problem.
-  //     //this knex query will pull every coinbase ETH purchase transferred to binance
-  //     return knex('purchases')
-  //       .sum('pch_units')
-  //       .where('symbol','=','ETH')
-  //       .where('withdrawn','=',true)
-  //       .then((knexResult)=>{
-  //         allCryptosSumsWithNegatives['ETH'] += parseFloat(knexResult[0].sum)
-  //         return allCryptosSumsWithNegatives;
-  //       })
-  //   })
-  //   .then((allCryptosSumsProper)=>{
-  //     Object.keys(allCryptosSumsProper).forEach((singleCryptoSum)=>{
-  //       let obj = {};
-  //       obj.symbol = singleCryptoSum;
-  //       obj.weighted_usd_per_unit = null;
-  //       obj.liquid_units = allCryptosSumsProper[singleCryptoSum];
-  //       obj.from = 'trades';
-  //       insertIntoBalancesTable.push(obj);
-  //     })
-  //     return knex('balances')
-  //       .insert(insertIntoBalancesTable)
-  //       .then((knexResult)=>{
-  //         //NOTE: to trades_conversions this inserts all trades which require converting units to USD
-  //         return knex('trades_conversions')
-  //           .insert(strayBNBFees);
-  //       })
-  //       .then((done)=>{
-  //         console.log('calculated all balances from all trades');
-  //         knex.destroy();
-  //       })
-  //   })
+  .then((allCryptosWithSums)=>{
+    //HACK --> technically, this is a hack.  10 July 2018
+    //But since I only purchase ETH from coinbase, don't see an immediate problem.
+    //this knex query will pull every coinbase ETH purchase transferred to binance
+    return knex('purchases')
+      .sum('pch_units')
+      .where('symbol','=','ETH')
+      .where('withdrawn','=',true)
+      .then((knexResult)=>{
+        allCryptosWithSums['ETH'] += parseFloat(knexResult[0].sum);
+        return allCryptosWithSums
+      })
+  })
+  .then((allCryptoSumsProper)=>{
+    Object.keys(allCryptoSumsProper).forEach((singleCryptoSum)=>{
+      let obj = {};
+      obj.symbol = singleCryptoSum;
+      obj.weighted_usd_per_unit = null;
+      obj.liquid_units = allCryptoSumsProper[singleCryptoSum];
+      obj.from = 'trades';
+      insertIntoBalancesTable.push(obj);
+    })
+    
+    return knex('balances')
+      .insert(insertIntoBalancesTable)
+      .then((knexResult)=>{
+        //NOTE: to trades_conversions this inserts all trades which require converting units to USD
+        return knex('trades_conversions')
+          .insert(strayBNBFees);
+      })
+      .then((done)=>{
+        console.log('calculated all balances from all trades');
+        knex.destroy();
+      })
+  })
