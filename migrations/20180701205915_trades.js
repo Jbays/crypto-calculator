@@ -3,7 +3,6 @@ const tradeData = require('../data/trades');
 exports.up = (knex, Promise)=> {
   return knex.schema.createTable('trades',(table)=>{
     table.dateTime('date_trade');
-    table.string('trade_type');
     table.increments('trade_id');
     table.string('trade_buy_symbol');
     table.string('trade_sell_symbol');
@@ -12,10 +11,19 @@ exports.up = (knex, Promise)=> {
     table.decimal('total_cost',16,10);
     table.decimal('fee',16,10);
     table.string('fee_coin_symbol');
-    //should this table have a purchase_id??
   })
   .then((response)=>{
-    return knex('trades').insert(tradeData)
+    let simplifiedTradeData = tradeData.map((singleTrade)=>{
+      if ( singleTrade.trade_type === 'SELL' ) {
+        //variable swap!
+        [singleTrade.trade_buy_symbol, singleTrade.trade_sell_symbol] = [singleTrade.trade_sell_symbol, singleTrade.trade_buy_symbol];
+        [singleTrade.amount, singleTrade.total_cost] = [singleTrade.total_cost, singleTrade.amount];
+      }
+      delete singleTrade.trade_type;
+      return singleTrade;
+    });
+
+    return knex('trades').insert(simplifiedTradeData)
   })
   .catch((err)=>{
     return console.error('error from trades migration',err);
