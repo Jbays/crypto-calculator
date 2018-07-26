@@ -13,10 +13,11 @@ exports.up = (knex, Promise)=> {
     table.string('fee_coin_symbol');
   })
   .then((response)=>{
-    let simplifiedTradeData = tradeData.map((singleTrade,index)=>{
+    let simplifiedTradeData = tradeData.map((singleTrade)=>{
       if ( singleTrade.trade_type === 'SELL' ) {
         //variable swap!
         [singleTrade.trade_buy_symbol, singleTrade.trade_sell_symbol] = [singleTrade.trade_sell_symbol, singleTrade.trade_buy_symbol];
+        [singleTrade.amount, singleTrade.total_cost] = [singleTrade.total_cost, singleTrade.amount];
       }
       delete singleTrade.trade_type;
       return singleTrade;
