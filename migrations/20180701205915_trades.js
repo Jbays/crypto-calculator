@@ -5,12 +5,15 @@ exports.up = (knex, Promise)=> {
     table.dateTime('date_trade');
     table.increments('trade_id');
     table.string('trade_buy_symbol');
+    //table.foreign('trade_buy_symbol').references('coins_index.symbol)
     table.string('trade_sell_symbol');
+    //table.foreign('trade_sell_symbol').references('coins_index.symbol)
     table.decimal('price',16,10);
     table.decimal('amount',16,10);
     table.decimal('total_cost',16,10);
     table.decimal('fee',16,10);
     table.string('fee_coin_symbol');
+    //table.foreign('fee_coin_symbol').references('coins_index.symbol)
   })
   .then((response)=>{
     let simplifiedTradeData = tradeData.map((singleTrade)=>{

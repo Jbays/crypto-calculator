@@ -9,9 +9,6 @@ exports.up = (knex, Promise)=>{
     table.decimal('pch_usd_per_unit')
     table.decimal('pch_units',16,10)
     table.boolean('withdrawn')
-    // NOTE: create trades table then comment in code below
-    // table.string('trade_id')
-    // table.foreign('trade_id').references('trades.trade_id')
   })
   .then((response)=>{
     return knex('purchases').insert(purchaseData)
