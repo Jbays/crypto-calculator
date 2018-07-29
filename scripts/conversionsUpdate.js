@@ -10,7 +10,7 @@ const conversionsData = require('../data/conversions');
 //for fetching certain crypto prices at particular dates.
 
 let promiseArr = [];
-console.log(conversionsData[0])
+
 conversionsData.forEach((conversionEntry)=>{
   promiseArr.push(
     knex('trades_conversions')
@@ -31,14 +31,3 @@ conversionsData.forEach((conversionEntry)=>{
 })
 
 Promise.all(promiseArr);
-
-// knex('trades_conversions')
-//   .where('trade_id','=',conversionsData[0].trade_id)
-//   .update({
-//     usd_per_unit:conversionsData[0].usd_per_unit,
-//     bnb_price_usd:conversionsData[0].bnb_price_usd
-//   })
-//   .then((response)=>{
-//     console.log(response);
-//     knex.destroy();
-//   })
