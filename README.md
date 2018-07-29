@@ -10,46 +10,52 @@ Calculates profitability for crypto assets
 ## To Run db migrations:
 `knex migrate:latest`
 
-Populates 1. seed data for 10 cryptocurrencies (dated 30 June 2018).
-          2. all purchases made on coinbase.
-          3. all trades made on binance.  (up to 2 July 2018)
+Migrations include data for:
+1. All purchases --> usd to crypto.
+2. All trades --> crypto1 to crypto2.
 
-### Up to date pricing
+## Features:
+Scripts Populate: 
+1. seed data for 10 cryptocurrencies (dated 30 June 2018).
+2. all cryptocurrency balances resulting from both purchases and trades (28 July 2018)
+3. trades_conversions table with historical crypto prices from cryptocurrencychart.com
+4. profitability && profit margin for each cryptocurrency.
+
+### 1. Up to date pricing
 `node updatePrice.js`
 
 1. Updates database with the latest prices for 10 different cryptocurrencies.
 
 Prices are from [CoinMarketCap](https://coinmarketcap.com/)
 
-### Updates balances table
-`node updateBalance.js`
+### 2. Updates balances table
+`node updateBalancePurchase.js && updateBalanceTrades.js`
 
-#### Purchases Balance
+#### 2a. Purchases Balance
 For each cryptocurrency in __purchase__ table:
 1. Calculates all units available cash (liquid).
 2. Calculates the weighted cost per unit acquisition
 3. Inserts these entries into the balance table.
 
-#### Trades Balance
+#### 2b. Trades Balance
 For each cryptocurrency in __trades__ table:
 1. Calculates all units available cash (liquid).
 2. Calculates the weighted cost per unit acquisition.
 3. Inserts these entries into the balance table.
 
-##### Useful SQL Queries
-All information required to understand trade:
-`select date_trade,trade_buy_symbol,amount-fee as liquid_units,trade_sell_symbol,total as costs from trades
-where trade_type = 'BUY';`
+### 3. Fetch n' Populate table with historical crypto prices
+`node findTradeConversions.js`
 
-Total estimated investment:
-`select symbol, liquid_units*weighted_usd_per_unit as total_investment from balances;`
+#### BNB/USD necessary for profitability calculation
+To calculate true profitability, I need BNB prices for most trades.  
 
-All purchases from coinbase transferred to binance:
-`select sum(pch_units) from "purchase(pch)"
- where symbol = 'ETH' and withdrawn = true;`
+Reason: Binance reduces transaction fees if you pay fees in BNB.
+
+### 4. Calculate profitability
+To be continued.  28 July 2018.
 
 ### ERD:
 
 ![alt text][erd]
 
-[erd]: https://github.com/Jbays/crypto-calculator/blob/master/assets/crypto-calculator-erd.png
+[erd]: https://github.com/Jbays/crypto-calculator/blob/18_updateErd/assets/crypto-calculator-erd.png
