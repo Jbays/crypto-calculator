@@ -3,7 +3,7 @@ const tradeData = require('../data/trades');
 exports.up = (knex, Promise)=> {
   return knex.schema.createTable('trades',(table)=>{
     table.dateTime('date_trade');
-    table.increments('trade_id');
+    table.increments('trade_id').primary();
     table.string('trade_buy_symbol');
     //table.foreign('trade_buy_symbol').references('coins_index.symbol)
     table.string('trade_sell_symbol');

@@ -2,7 +2,7 @@ const purchaseData = require('../data/purchases');
 
 exports.up = (knex, Promise)=>{
   return knex.schema.createTable('purchases',(table)=>{
-    table.increments('pch_id');
+    table.increments('pch_id').primary();
     table.date('pch_date');
     table.string('symbol');
     // table.foreign('symbol').references('coins_index.symbol');

@@ -81,3 +81,6 @@ knex('trades')
             'and bnb_price')
     knex.destroy();
   })
+  .catch((err)=>{
+    console.error('find all tradeConversions error',err);
+  })
