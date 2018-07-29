@@ -19,7 +19,7 @@ knex('purchases')
   /**
     if object does not have key
     then add key && prop
-    else culmulatively add prop
+    else add to sum of prop
   */
   response.forEach((object)=>{
     if ( !sumsObj.hasOwnProperty(object.symbol) ){
