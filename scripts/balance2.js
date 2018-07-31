@@ -57,7 +57,6 @@ knex('trades')
       obj.symbol = singleCryptoSum;
       obj.weighted_usd_per_unit = null;
       obj.liquid_units = allCryptoSumsProper[singleCryptoSum];
-      obj.from = null;
 
       promiseArr.push(
         knex('balances')
@@ -123,7 +122,6 @@ knex('trades')
               symbol: insertIntoBalanceTable[index].symbol,
               weighted_usd_per_unit: insertIntoBalanceTable[index].weighted_usd_per_unit,
               liquid_units: insertIntoBalanceTable[index].liquid_units,
-              from: null
             })
         )
       }

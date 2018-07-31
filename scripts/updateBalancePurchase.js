@@ -54,7 +54,6 @@ knex('purchases')
     obj.symbol = entry[0];
     obj.liquid_units = entry[1];
     obj.weighted_usd_per_unit = entry[2];
-    obj.from = 'purchases';
     allCryptoSums.push(obj);
   })
 
