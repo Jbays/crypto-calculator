@@ -95,11 +95,8 @@ knex('trades')
     //this promiseArr is used to update / insert entries into the balances table
     let promiseArr = [];
     //now I can reach into the balances && update where appropriate.
-    // console.log('allBalanceEntries',allBalanceEntries);
 
     allBalanceEntries.forEach((singleBalance)=>{
-      console.log(singleBalance);
-
       promiseArr.push(
         knex('balances')
           .where('symbol','=',singleBalance.symbol)
@@ -111,17 +108,36 @@ knex('trades')
             from: singleBalance.from
           })
       )
-
     })
-
     return Promise.all(promiseArr);
-      // knex('balances')
-      //   .where
+  })
+  .then((postUpdate)=>{
+    let promiseArr = [];
 
-    })
-    .then((postUpdate)=>{
-      console.log('postUpdate',postUpdate)
-      knex.destroy();
+    postUpdate.forEach((unsuccessfulUpdates,index)=>{
+      if ( unsuccessfulUpdates === 0 ) {
+        promiseArr.push(
+          knex('balances')
+            .where('symbol','=',insertIntoBalanceTable[index].symbol)
+            .insert({
+              symbol: insertIntoBalanceTable[index].symbol,
+              weighted_usd_per_unit: insertIntoBalanceTable[index].weighted_usd_per_unit,
+              liquid_units: insertIntoBalanceTable[index].liquid_units,
+              from: null
+            })
+        )
+      }
+    });
+
+    return Promise.all(promiseArr)
+  })
+  .then((done)=>{
+    console.log(
+      'for each crypto,', '\n',
+      'inserted into balance table is:', '\n',
+      'a crypto database entry with fields symbol, weighted_usd_per_unit, and liquid_units'
+    );
+    knex.destroy();
   })
 
   
