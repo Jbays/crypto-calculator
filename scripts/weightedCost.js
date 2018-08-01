@@ -61,8 +61,39 @@ knex('trades')
             return allCryptoSumsWithNegatives;
           })
       })
-      .then((allCryptoSumsProper)=>{
-        console.log('allCryptoSumsProper', allCryptoSumsProper)
+      .then((symbolsAndSums)=>{
+        //symbols and sums
+        console.log('symbolsAndSums',symbolsAndSums);
+        
+        knex('trades')
+        .join('trades_conversions','trades.trade_id','=','trades_conversions.trade_id')
+        .then((allTradesWithConversions)=>{
+          let arr = [];
+          // let allTradesJoined = tradesWithoutConversions.concat(...allTradesWithConversions);
+          // console.log('these are all trades',allTradesJoined);
+
+          Object.keys(symbolsAndSums).forEach((singleCrypto)=>{
+            let weighted_cost_per_unit = 0;
+            
+            
+            allTradesWithConversions.forEach((singleTrade)=>{
+              
+              if ( singleTrade.trade_buy_symbol === singleCrypto ) {
+                console.log('singleCrypto',singleCrypto);
+                // console.log('singleTrade.amount', parseFloat(singleTrade.amount)/symbolsAndSums[singleCrypto]);
+
+                //
+                console.log('singleTrade.amount', parseFloat(singleTrade.amount)/symbolsAndSums[singleCrypto]);
+                weighted_cost_per_unit += parseFloat(singleTrade.amount)/symbolsAndSums[singleCrypto];
+
+              }
+              console.log('weighted_cost_per_unit',weighted_cost_per_unit);
+
+            })
+            // arr.push([singleCrypto,weighted_cost_per_unit]);
+          })
+        })
+
 
         // let weightedCosts = [];
         // //each unique crypto now has a corresponding (correct) liquid_units
