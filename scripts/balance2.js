@@ -40,13 +40,13 @@ knex('trades')
   .then((allCryptosWithSums)=>{
     //this step removes all the negative ETH from the balances object.
     return knex('purchases')
-    .sum('pch_units')
-    .where('symbol', '=', 'ETH')
-    .where('withdrawn', '=', true)
-    .then((knexResult) => {
-      allCryptosWithSums['ETH'] += parseFloat(knexResult[0].sum);
-      return allCryptosWithSums
-    })
+      .sum('pch_units')
+      .where('symbol', '=', 'ETH')
+      .where('withdrawn', '=', true)
+      .then((knexResult) => {
+        allCryptosWithSums['ETH'] += parseFloat(knexResult[0].sum);
+        return allCryptosWithSums
+      })
   })
   .then((allCryptoSumsProper)=>{
     //this promiseArr is used to fetch all entries in the balance table.
