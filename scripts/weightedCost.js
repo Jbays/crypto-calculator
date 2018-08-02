@@ -59,15 +59,16 @@ knex('trades')
           let amount = parseFloat(singleTrade.amount);
           let usdPerUnit = parseFloat(singleTrade.usd_per_unit);
           let sum = allCryptoSumsAndSymbols[singleTrade.trade_buy_symbol];
-          let fee = ( singleTrade.trade_buy_symbol !== singleTrade.fee_coin_symbol ) ? parseFloat(singleTrade.fee*singleTrade.bnb_price_usd) : 0;
+          //if singleTrade.trade_buy_symbol === singleTrade.fee_coin-symbol, then the fee's already been subtracted!
+          let feeInUsd = ( singleTrade.trade_buy_symbol !== singleTrade.fee_coin_symbol ) ? parseFloat(singleTrade.fee*singleTrade.bnb_price_usd).toFixed(4) : 0;
           
-          // console.log("this is singleTrade",singleTrade);
-          // console.log("this is fee >>>>>>>",fee,'\n');
+          console.log("this is singleTrade",singleTrade);
+          console.log("this is feeInUsd >>>>>>>",feeInUsd,'\n');
 
           if ( !weightsObj.hasOwnProperty(singleTrade.trade_buy_symbol) ) {
-            weightsObj[singleTrade.trade_buy_symbol] = ((price*(amount-fee)*usdPerUnit)/sum);
+            weightsObj[singleTrade.trade_buy_symbol] = ((price*(amount-feeInUsd)*usdPerUnit)/sum);
           } else {
-            weightsObj[singleTrade.trade_buy_symbol] += ((price*(amount-fee)*usdPerUnit)/sum);
+            weightsObj[singleTrade.trade_buy_symbol] += ((price*(amount-feeInUsd)*usdPerUnit)/sum);
           }
         })
 
