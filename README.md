@@ -1,58 +1,50 @@
 # crypto-calculator
-Calculates profitability for crypto assets
-
-## To Run tests
-`npm run test`
-
-## To Run Server
-`nodemon index.js`
+This backend application calculates profitability for all crypto assets.
 
 ## To Run db migrations:
 `knex migrate:latest`
 
-Migrations include data for:
+## To Run db seeds:
+`knex seed:run`
+
+Seed data includes both purchase and trade information.
 1. All purchases --> usd to crypto.
 2. All trades --> crypto1 to crypto2.
 
-## Features:
-Scripts Populate: 
-1. seed data for 10 cryptocurrencies (dated 30 June 2018).
-2. all cryptocurrency balances resulting from both purchases and trades (28 July 2018)
-3. trades_conversions table with historical crypto prices from cryptocurrencychart.com
-4. profitability && profit margin for each cryptocurrency.
+## Scripts
+In the scripts directory are node files which perform specific operations related to calculating profitability.  The field I need to calculate for each cryptocurrency is `weighted_usd_per_unit`.
 
-### 1. Up to date pricing
-`node updatePrice.js`
+### Example 1. updatePrice.js
+`node scripts/updatePrice.js`
 
-1. Updates database with the latest prices for 10 different cryptocurrencies.
+To calculate profitability, I need the most current prices.
+
+This script fetches the latest price information for 10 cryptocurrencies.
 
 Prices are from [CoinMarketCap](https://coinmarketcap.com/)
 
-### 2. Updates balances table
-`node updateBalancePurchase.js && updateBalanceTrades.js`
+Fetched data will update entries in the coins_index table.
 
-#### 2a. Purchases Balance
-For each cryptocurrency in __purchase__ table:
-1. Calculates all units available cash (liquid).
-2. Calculates the weighted cost per unit acquisition
-3. Inserts these entries into the balance table.
+### Example 2. updateBalancePurchases.js
+`node scripts/updateBalancePurchases.js`
 
-#### 2b. Trades Balance
-For each cryptocurrency in __trades__ table:
-1. Calculates all units available cash (liquid).
-2. Calculates the weighted cost per unit acquisition.
-3. Inserts these entries into the balance table.
+Because a single purchase contains less data, calculating `weighted_usd_per_unit` for purchases is much simpler.
 
-### 3. Fetch n' Populate table with historical crypto prices
-`node findTradeConversions.js`
+For each **purchased** cryptocurrency, this script calculates:
+1. the sum
+2. the weighted_usd_per_unt
 
-#### BNB/USD necessary for profitability calculation
-To calculate true profitability, I need BNB prices for most trades.  
+Then, the calculated objects are inserted into the balances table.
 
-Reason: Binance reduces transaction fees if you pay fees in BNB.
+## Calculating Profitability
+To calculate `weighted_cost_per_unit`, run this script:
+`knex migrate:rollback && knex migrate:latest && knex seed:run && node scripts/updatePrice.js && node scripts/updateBalancePurchase.js && node scripts/weightedCost`
 
-### 4. Calculate profitability
-To be continued.  28 July 2018.
+After these six commands, in the balances table is an updated entry for each cryptocurrency.
+
+In the balances table.  Each unique cryptocurrency should show the sum of all `liquid units` (how much of this currency I have available) and the `weighted_usd_per_unit`.
+
+if `coins_index.usd_per_unit` > `balances.weighted_usd_per_unit`, then that cryptocurrency is PROFITABLE!
 
 ### ERD:
 
