@@ -38,6 +38,7 @@ Then, the calculated objects are inserted into the balances table.
 
 ## Calculating Profitability
 To calculate `weighted_cost_per_unit`, run this script:
+
 `knex migrate:rollback && knex migrate:latest && knex seed:run && node scripts/updatePrice.js && node scripts/updateBalancePurchase.js && node scripts/weightedCost`
 
 After these six commands, in the balances table is an updated entry for each cryptocurrency.
