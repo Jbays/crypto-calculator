@@ -36,7 +36,6 @@ knex('trades')
             });
           }
         })
-        // console.log('allCryptosBought after!!!',allCryptosBought);
         return allCryptosBought;
       })
   })
